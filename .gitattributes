@@ -1,0 +1,15 @@
+$ cat .gitattributes
+* text=auto
+
+wrenc binary
+wrenc-mac binary
+wrenc.exe binary
+
+Makefile text
+LICENSE text
+*.md text
+*.adoc text
+
+*.livemd text
+*.livemd linguist-language=Markdown
+*.livemd linguist-vendored
