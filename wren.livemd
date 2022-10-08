@@ -1,0 +1,157 @@
+# Wren Book
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.6.1"},
+  {:temp, "~> 0.4"}
+])
+```
+
+## About Wren
+
+Think Smalltalk in a Lua-sized package with a dash of Erlang and wrapped up in a familiar, modern syntax. See more at https://wren.io/
+
+## Configuration
+
+Choose the binary file to execute Wren Scripts
+
+```elixir
+defmodule Wren do
+  # Binary Name
+  # Currently using https://github.com/joshgoebel/wren-console/releases/tag/v0.3.1
+  # since it has more built in libraries
+  @unix "wrenc"
+  @macos "wrenc-mac"
+  @windows "wrenc.exe"
+
+  # Choose platform
+  @current @macos
+
+  def path(executable \\ @current) do
+    Path.expand("#{__DIR__}/./bin/#{executable}")
+  end
+
+  def unix() do
+    path(@unix)
+  end
+
+  def windows() do
+    path(@windows)
+  end
+
+  def macos() do
+    path(@macos)
+  end
+end
+```
+
+## Wren Cell
+
+Defines how Wren Scripts are executed.
+
+```elixir
+defmodule KinoGuide.WrenCell do
+  use Kino.JS
+  use Kino.JS.Live
+  use Kino.SmartCell, name: "Wren script"
+
+  @impl true
+  def init(_attrs, ctx) do
+    {:ok, ctx, editor: [attribute: "source", language: "javascript"]}
+  end
+
+  @impl true
+  def handle_connect(ctx) do
+    {:ok, %{}, ctx}
+  end
+
+  @impl true
+  def to_attrs(_ctx) do
+    %{}
+  end
+
+  @impl true
+  def to_source(attrs) do
+    quote do
+      path = Temp.path!()
+      File.write!(path, unquote(attrs["source"]))
+
+      System.shell(
+        """
+        trap "rm -f #{path}" 0 2 3 15
+        #{Wren.path()} #{path}
+        """,
+        into: IO.stream(),
+        stderr_to_stdout: true
+      )
+      |> elem(1)
+    end
+    |> Kino.SmartCell.quoted_to_string()
+  end
+
+  asset "main.js" do
+    """
+    export function init(ctx, payload) {
+      ctx.importCSS("main.css");
+
+      root.innerHTML = `
+        <div class="app">
+          Wren script
+        </div>
+      `;
+    }
+    """
+  end
+
+  asset "main.css" do
+    """
+    .app {
+      padding: 8px 16px;
+      border: solid 1px #cad5e0;
+      border-radius: 0.5rem 0.5rem 0 0;
+      border-bottom: none;
+    }
+    """
+  end
+end
+
+Kino.SmartCell.register(KinoGuide.WrenCell)
+```
+
+## Scripts
+
+Here you can run your scripts using _Wren Script Smart Cells_.
+
+## Hello Example
+
+<!-- livebook:{"attrs":{"source":"System.print(\"Hello, world!\")\n\nclass Wren {\n  flyTo(city) {\n    System.print(\"Flying to %(city)\")\n  }\n}\n\nvar adjectives = Fiber.new {\n  [\"small\", \"clean\", \"fast\"].each {|word| Fiber.yield(word) }\n}\n\nwhile (!adjectives.isDone) System.print(adjectives.call())"},"kind":"Elixir.KinoGuide.WrenCell","livebook_object":"smart_cell"} -->
+
+```elixir
+path = Temp.path!()
+
+File.write!(
+  path,
+  "System.print(\"Hello, world!\")\n\nclass Wren {\n  flyTo(city) {\n    System.print(\"Flying to %(city)\")\n  }\n}\n\nvar adjectives = Fiber.new {\n  [\"small\", \"clean\", \"fast\"].each {|word| Fiber.yield(word) }\n}\n\nwhile (!adjectives.isDone) System.print(adjectives.call())"
+)
+
+System.shell("trap \"rm -f #{path}\" 0 2 3 15
+#{Wren.path()} #{path}
+", into: IO.stream(), stderr_to_stdout: true) |> elem(1)
+```
+
+## Fractal Example
+
+<!-- livebook:{"attrs":{"source":"for (yPixel in 0...24) {\n  var y = yPixel / 12 - 1\n  for (xPixel in 0...80) {\n    var x = xPixel / 30 - 2\n    var x0 = x\n    var y0 = y\n    var iter = 0\n    while (iter < 11 && x0 * x0 + y0 * y0 <= 4) {\n      var x1 = (x0 * x0) - (y0 * y0) + x\n      var y1 = 2 * x0 * y0 + y\n      x0 = x1\n      y0 = y1\n      iter = iter + 1\n    }\n    System.write(\" .-:;+=xX$& \"[iter])\n  }\n  System.print(\"\")\n}"},"kind":"Elixir.KinoGuide.WrenCell","livebook_object":"smart_cell"} -->
+
+```elixir
+path = Temp.path!()
+
+File.write!(
+  path,
+  "for (yPixel in 0...24) {\n  var y = yPixel / 12 - 1\n  for (xPixel in 0...80) {\n    var x = xPixel / 30 - 2\n    var x0 = x\n    var y0 = y\n    var iter = 0\n    while (iter < 11 && x0 * x0 + y0 * y0 <= 4) {\n      var x1 = (x0 * x0) - (y0 * y0) + x\n      var y1 = 2 * x0 * y0 + y\n      x0 = x1\n      y0 = y1\n      iter = iter + 1\n    }\n    System.write(\" .-:;+=xX$& \"[iter])\n  }\n  System.print(\"\")\n}"
+)
+
+System.shell("trap \"rm -f #{path}\" 0 2 3 15
+#{Wren.path()} #{path}
+", into: IO.stream(), stderr_to_stdout: true) |> elem(1)
+```
