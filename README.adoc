@@ -1,4 +1,5 @@
 # Wren Livebook
+
 Execute https://wren.io/[Wren Scripts] within your https://livebook.dev/[Livebook].
 
 
@@ -6,9 +7,10 @@ image:https://user-images.githubusercontent.com/292738/194683946-fc8ec366-80ba-4
 
 ## Installation
 
-1 - Install https://livebook.dev/[Livebook].
-2 - Open `wren.livemd`
-3 - Run the cells and enjoy!.
+1. Install https://livebook.dev/[Livebook].
+2. Open `wren.livemd`.
+3. Choose your wren binary.
+4. Run the cells and enjoy!.
 
 ## Credits
 
