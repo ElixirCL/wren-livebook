@@ -1,9 +1,10 @@
-# Wren Livebook
+# https://github.com/ElixirCL/wren-livebook[Wren Livebook]
 
 Execute https://wren.io/[Wren Scripts] within your https://livebook.dev/[Livebook].
 
-
 image:https://user-images.githubusercontent.com/292738/194683946-fc8ec366-80ba-4507-a45f-a0a9a0865c3d.png[Hello Wren]
+
+Repository: https://github.com/ElixirCL/wren-livebook
 
 ## Installation
 
